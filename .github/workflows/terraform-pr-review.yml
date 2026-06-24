@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   terraform-review:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: [self-hosted, Linux, X64]
 
     env:
       TF_ENV: ${{ vars.TF_ENV }}
@@ -21,7 +21,7 @@ jobs:
       BACKEND_CONFIG: backend-${{ vars.TF_ENV }}.hcl
       OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
       OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
-      PYTHON_BIN: ${{ vars.PYTHON_BIN }}
+      PYTHON_BIN: python3
       INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
 
     steps:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          $PYTHON_BIN -m pip install --user openai requests checkov
+          $PYTHON_BIN -m pip install --user openai requests checkov distro
 
       - name: Terraform Init
         run: terraform init -input=false -backend-config=$BACKEND_CONFIG
@@ -85,9 +85,9 @@ jobs:
         if: env.INFRACOST_API_KEY != ''
         run: |
           infracost breakdown \
-            --path . \
-            --terraform-var-file $TFVARS_FILE \
-            --format table > infracost.txt
+          --path . \
+          --terraform-var-file $TFVARS_FILE \
+          --format table > infracost.txt
 
       - name: Skip Infracost if no API key
         if: env.INFRACOST_API_KEY == ''
@@ -111,7 +111,7 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('ai-report.txt', 'utf8');
-            const body = `## Terraform AI Review\n\n\`\`\`\n${report.substring(0, 6000)}\n\`\`\``;
+            const body = `## Terraform AI Review\n\n\`\`\`\n${report.substring(0, 60000)}\n\`\`\``;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
