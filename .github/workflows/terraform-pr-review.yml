@@ -31,12 +31,12 @@ jobs:
       - name: Check required tools
         run: |
           terraform version
-          $PYTHON_BIN --version
+          python3 --version
           curl -s http://localhost:11434/api/tags
 
       - name: Install Python dependencies
         run: |
-          $PYTHON_BIN -m pip install --user openai requests checkov distro
+          python3 -m pip install --user openai requests checkov distro
 
       - name: Terraform Init
         run: terraform init -input=false -backend-config=$BACKEND_CONFIG
@@ -94,7 +94,7 @@ jobs:
         run: echo "Infracost skipped because INFRACOST_API_KEY is not configured." > infracost.txt
 
       - name: Run AI review
-        run: $PYTHON_BIN ai/ai_review.py > ai-report.txt
+        run: python3 ai/ai_review.py > ai-report.txt
 
       - name: Show AI report
         run: cat ai-report.txt
@@ -102,7 +102,7 @@ jobs:
       - name: Send Slack report
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: $PYTHON_BIN ai/slack_send.py
+        run: python3 ai/slack_send.py
 
       - name: Comment AI report on PR
         if: github.event_name == 'pull_request'
