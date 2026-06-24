@@ -10,15 +10,6 @@ jobs:
   terraform-ai-review:
     runs-on: [self-hosted, Linux, X64]
 
-    env:
-      OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
-      OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
-      PYTHON_BIN: python3
-
-      # Only needed if you are NOT using EC2 IAM role
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -27,11 +18,10 @@ jobs:
         run: |
           terraform version
           python3 --version
-          curl -s http://localhost:11434/api/tags
 
       - name: Install Python Dependencies
         run: |
-          python3 -m pip install --user openai requests distro
+          python3 -m pip install --user openai requests distro checkov
 
       - name: Terraform Init
         run: terraform init
@@ -42,10 +32,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan Using tfvars
-        run: terraform plan -var-file="terraform.tfvars" -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-      - name: Convert Plan to Text
+      - name: Convert Plan To Text
         run: terraform show -no-color tfplan > tfplan.txt
 
       - name: Run AI Review
